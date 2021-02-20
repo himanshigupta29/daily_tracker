@@ -12,7 +12,11 @@ class TrackingDate extends Component {
         this.state = {
             date: this.getDate(),
             absent: [],
-            isdateabsent: false
+            isdateabsent: false,
+            month: this.getDate().getMonth(),
+            payperday: 65,
+            pay: 0,
+            workingDays: 0
         }
     }
 
@@ -21,6 +25,13 @@ class TrackingDate extends Component {
         return new Date();
 
     }
+
+     daysInMonth = (month) => { 
+         const year = this.getDate().getYear();
+        return new Date(year, month+1, 0).getDate(); 
+    } 
+
+
 
     setPreviousDate = ()=>{
       
@@ -68,6 +79,41 @@ class TrackingDate extends Component {
     logAbsents = () => {
         console.log('Total absents', this.state.absent);
     }
+
+    changeMonth = (e) => {
+
+        console.log('=======================', e.target.value);
+        e.preventDefault();
+
+        this.setState({month: e.target.value, pay:0, workingDays: 0});
+
+    }
+
+    computePay = () => {
+
+        let totalabsent = 0, absentDate;
+
+        for(let i = 0; i <this.state.absent.length; i++) {
+            absentDate = this.state.absent[i].name;
+
+            console.group('absentDate', absentDate.getMonth());
+
+            if(absentDate.getMonth() === this.state.month) {
+                console.log('1 matching month');
+                totalabsent += 1;
+            }
+
+        }
+
+
+
+        console.log('========= month ==========', this.state.month);
+        console.log('toal Absent dats ', totalabsent);
+        console.log(' Get present dats', this.daysInMonth(this.state.month));
+
+        const wday = this.daysInMonth(this.state.month)-totalabsent;
+        this.setState({workingDays:wday, pay: this.state.payperday*wday});
+    }
   
     render() {
 
@@ -77,16 +123,44 @@ class TrackingDate extends Component {
             isAbsent = false;
         }
 
+        let pay;
+        if(this.state.pay) {
+             pay = <h4> Pay: {this.state.pay} for {this.state.workingDays} days </h4> ;
+        }
+
         return (
 
             <div>
+
+                <h3>
+                    Rate per day {this.state.payperday}
+                </h3>
+
+                <select name="cars" id="cars" onChange = {this.changeMonth} value = {this.state.month} >
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+
+                <button onClick = {this.computePay}> Compute Pay </button>
+                {pay}
+
+
                 <ShowDate date = {this.state.date} isAbsent = {isAbsent} />
                 <button onClick = {this.setPreviousDate}> Previous</button>
                 <button onClick = {this.setNextDate}> Next</button>
-
-              {absentbtn}
- 
+                {absentbtn}
                 <AbsentList absent = {this.state.absent} />
+
 
             </div>
 
